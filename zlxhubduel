@@ -1,0 +1,143 @@
+-- =================================
+-- 🔐 ZLX HUB | FULL SCRIPT (KEY + GUI)
+-- =================================
+
+-- ===== SERVICES =====
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
+
+-- ===== KEYS.TXT RAW LINK =====
+local KEYS_URL = "https://raw.githubusercontent.com/realzlx5/keys.txt/main/keys.txt"
+
+-- ===== KEY CHECK =====
+local userKey = getgenv().script_key
+if not userKey then
+    player:Kick("❌ No Key")
+    return
+end
+
+local ok, keysData = pcall(function()
+    return game:HttpGet(KEYS_URL)
+end)
+
+if not ok then
+    player:Kick("❌ Could not load keys")
+    return
+end
+
+local valid = false
+for k in string.gmatch(keysData, "[^\r\n]+") do
+    if k == userKey then
+        valid = true
+        break
+    end
+end
+
+if not valid then
+    player:Kick("❌ Wrong Key")
+    return
+end
+
+-- ===== CHARACTER =====
+local function getHumanoid()
+    local char = player.Character or player.CharacterAdded:Wait()
+    return char:WaitForChild("Humanoid"), char
+end
+
+local humanoid, character = getHumanoid()
+player.CharacterAdded:Connect(function()
+    humanoid, character = getHumanoid()
+end)
+
+-- =================================
+-- 🎨 GUI
+-- =================================
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "ZLXHub"
+ScreenGui.Parent = player.PlayerGui
+
+local Frame = Instance.new("Frame", ScreenGui)
+Frame.Size = UDim2.new(0, 260, 0, 220)
+Frame.Position = UDim2.new(0.5, -130, 0.5, -110)
+Frame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Frame.Active = true
+Frame.Draggable = true
+
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0,12)
+
+local Title = Instance.new("TextLabel", Frame)
+Title.Size = UDim2.new(1,0,0,40)
+Title.BackgroundTransparency = 1
+Title.Text = "🌈 ZLX HUB"
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.TextColor3 = Color3.new(1,1,1)
+
+-- Rainbow title
+task.spawn(function()
+    local h = 0
+    while ScreenGui.Parent do
+        h = (h + 1) % 360
+        Title.TextColor3 = Color3.fromHSV(h/360, 1, 1)
+        task.wait(0.03)
+    end
+end)
+
+local function button(text, y)
+    local b = Instance.new("TextButton", Frame)
+    b.Size = UDim2.new(1, -20, 0, 40)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(40,40,40)
+    b.TextColor3 = Color3.new(1,1,1)
+    b.Text = text
+    b.Font = Enum.Font.Gotham
+    b.TextSize = 14
+    Instance.new("UICorner", b).CornerRadius = UDim.new(0,10)
+    return b
+end
+
+local speedBtn = button("Speed: OFF", 50)
+local jumpBtn  = button("Jump: OFF", 95)
+local spinBtn  = button("Spin: OFF", 140)
+
+-- =================================
+-- ⚙️ FEATURES
+-- =================================
+local SPEED = 50
+local JUMP = 120
+
+local speedOn = false
+local jumpOn = false
+local spinOn = false
+local spinConn
+
+speedBtn.MouseButton1Click:Connect(function()
+    speedOn = not speedOn
+    humanoid.WalkSpeed = speedOn and SPEED or 16
+    speedBtn.Text = speedOn and "Speed: ON" or "Speed: OFF"
+end)
+
+jumpBtn.MouseButton1Click:Connect(function()
+    jumpOn = not jumpOn
+    humanoid.JumpPower = jumpOn and JUMP or 50
+    jumpBtn.Text = jumpOn and "Jump: ON" or "Jump: OFF"
+end)
+
+spinBtn.MouseButton1Click:Connect(function()
+    spinOn = not spinOn
+    spinBtn.Text = spinOn and "Spin: ON" or "Spin: OFF"
+
+    if spinOn then
+        spinConn = RunService.Heartbeat:Connect(function(dt)
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame =
+                    character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(720) * dt, 0)
+            end
+        end)
+    else
+        if spinConn then spinConn:Disconnect() end
+    end
+end)
+
+print("✅ ZLX HUB LOADED")
