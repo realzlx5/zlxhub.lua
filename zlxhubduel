@@ -70,23 +70,22 @@ Instance.new("UICorner", frame).CornerRadius = UDim.new(0,16)
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,0,0,45)
 title.BackgroundTransparency = 1
-title.Text = "zlx Hub"
-title.Font = Enum.Font.GothamBlack
-title.TextSize = 26
-title.TextStrokeTransparency = 0.6
+title.Text = "🌈 ZLX HUB"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.new(1,1,1)
 
 -- Rainbow effect
 task.spawn(function()
     local h = 0
-    while true do
+    while gui.Parent do
         h = (h + 0.002) % 1
         title.TextColor3 = Color3.fromHSV(h,1,1)
-        task.wait()
+        task.wait(0.03)
     end
 end)
 
--- BUTTON CREATOR
-local function makeBtn(text, y)
+local function button(text, y)
     local b = Instance.new("TextButton", frame)
     b.Size = UDim2.new(1,-30,0,40)
     b.Position = UDim2.new(0,15,0,y)
@@ -112,12 +111,25 @@ local function makeBtn(text, y)
     return b
 end
 
-local speedBtn = makeBtn("Speed", 60)
-local jumpBtn  = makeBtn("Jump", 110)
-local spinBtn  = makeBtn("Spin", 160)
-local espBtn   = makeBtn("ESP", 210)
+local speedBtn = button("Speed: OFF", 60)
+local jumpBtn  = button("Jump: OFF", 110)
+local spinBtn  = button("Spin: OFF", 160)
+local espBtn   = button("ESP: OFF", 210)
 
--- HELPERS
+-- =================================
+-- ⚙️ FEATURES
+-- =================================
+local SPEED = 50
+local JUMP = 120
+
+local speedOn = false
+local jumpOn = false
+local spinOn = false
+local espOn = false
+local spinConn
+local espBoxes = {}
+
+-- Helpers
 local function getHum()
     local c = player.Character
     return c and c:FindFirstChildOfClass("Humanoid")
@@ -133,7 +145,7 @@ RunService.Heartbeat:Connect(function()
     if not speedOn then return end
     local hum = getHum()
     if hum and hum.MoveDirection.Magnitude > 0 then
-        hum.WalkSpeed = FAST_SPEED
+        hum.WalkSpeed = SPEED
     end
 end)
 
@@ -142,7 +154,7 @@ local function applyJump()
     local hum = getHum()
     if hum then
         hum.UseJumpPower = true
-        hum.JumpPower = jumpOn and JUMP_POWER or 50
+        hum.JumpPower = jumpOn and JUMP or 50
     end
 end
 
@@ -194,28 +206,28 @@ end
 -- BUTTON LOGIC
 speedBtn.MouseButton1Click:Connect(function()
     speedOn = not speedOn
-    speedBtn.Text = speedOn and "Speed : ON" or "Speed : OFF"
+    speedBtn.Text = speedOn and "Speed: ON" or "Speed: OFF"
     if not speedOn then
         local hum = getHum()
-        if hum then hum.WalkSpeed = NORMAL_SPEED end
+        if hum then hum.WalkSpeed = 16 end
     end
 end)
 
 jumpBtn.MouseButton1Click:Connect(function()
     jumpOn = not jumpOn
-    jumpBtn.Text = jumpOn and "Jump : ON" or "Jump : OFF"
+    jumpBtn.Text = jumpOn and "Jump: ON" or "Jump: OFF"
     applyJump()
 end)
 
 spinBtn.MouseButton1Click:Connect(function()
     spinOn = not spinOn
-    spinBtn.Text = spinOn and "Spin : ON" or "Spin : OFF"
+    spinBtn.Text = spinOn and "Spin: ON" or "Spin: OFF"
     if spinOn then startSpin() else stopSpin() end
 end)
 
 espBtn.MouseButton1Click:Connect(function()
     espOn = not espOn
-    espBtn.Text = espOn and "ESP : ON" or "ESP : OFF"
+    espBtn.Text = espOn and "ESP: ON" or "ESP: OFF"
     clearESP()
     if espOn then
         for _,p in pairs(Players:GetPlayers()) do
