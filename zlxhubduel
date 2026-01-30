@@ -169,7 +169,7 @@ local function startSpin()
 
     spinAV = Instance.new("AngularVelocity")
     spinAV.Attachment0 = att
-    spinAV.AngularVelocity = Vector3.new(0, SPIN_RATE, 0)
+    spinAV.AngularVelocity = Vector3.new(0, 12, 0)
     spinAV.MaxTorque = math.huge
     spinAV.Parent = hrp
 end
